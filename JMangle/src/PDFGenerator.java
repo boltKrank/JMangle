@@ -13,8 +13,9 @@ public class PDFGenerator
 {
 	ArrayList<Image> images;
 	Document pdfDocument;
-	String outPutFilename = "PDFOutput\\default.pdf";
+	String outPutFilename = "default.pdf";
 	String outputDirectory = ".";
+	int indentation = 0;
 	
 	public PDFGenerator()
 	{
@@ -46,6 +47,7 @@ public class PDFGenerator
         
 	}
 	
+	
 	public void generatePDF()
 	{
         try 
@@ -55,17 +57,26 @@ public class PDFGenerator
             pdfDocument.open();
             if(images.size()>1)
             {
+           
             	for(int i=0;i<images.size();i++)
             	{
-            		pdfDocument.add(images.get(i));
-            		//TODO Add page break
+            		Image image = images.get(i);
+            		
+            		float scaler = ((pdfDocument.getPageSize().getWidth() - pdfDocument.leftMargin()
+            		               - pdfDocument.rightMargin() - indentation) / image.getWidth()) * 100;
+
+            		image.scalePercent(scaler);
+            		
+            		pdfDocument.add(image);
+            		pdfDocument.newPage();
             	}
             }
             else
             {
             	pdfDocument.add(new Paragraph("No images to add."));
             }            
-            pdfDocument.close(); // no need to close PDFwriter?
+            pdfDocument.close(); 
+            System.out.println("Finished");
 
         } 
         catch (DocumentException e) 

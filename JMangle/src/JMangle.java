@@ -1,7 +1,22 @@
+/**
+ * TODO: 
+ * 
+ * Remove Run button ? or maybe create an ArrayList and a flag for multiple directories or not
+ * 
+ * Need to add sort algorithm, that notices the difference between 01 and 1, 
+ * i.e sorts 2 before 10.
+ * 
+ * Check for first numeral ?
+ * 
+ * 
+ */
+
+
 import java.awt.Container;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
+import java.util.Arrays;
 
 import javax.swing.JFileChooser;
 import javax.swing.JPanel;
@@ -16,6 +31,7 @@ public class JMangle extends JFrame implements ActionListener
   JPanel pane = new JPanel();
   JButton browse_button;
   JButton run_button;
+  JButton group_of_directories;
   File parsing_directory;
   PDFGenerator pdfGenerator;
     
@@ -28,11 +44,18 @@ public class JMangle extends JFrame implements ActionListener
     con.add(pane); // add the panel to frame
 
     //add browse button
-    browse_button = new JButton("Browse");
+    browse_button = new JButton("Single Directory");
     browse_button.setMnemonic('b');
     browse_button.addActionListener(this);
     pane.add(browse_button);
             
+    //add directory of directories (1 level) button
+    group_of_directories = new JButton("Multiple Directories");
+    group_of_directories.setMnemonic('b');
+    group_of_directories.addActionListener(this);
+    pane.add(group_of_directories);
+    
+    
     //add run button
     run_button = new JButton("Run");
     run_button.setMnemonic('r');
@@ -47,6 +70,29 @@ public class JMangle extends JFrame implements ActionListener
     
   }
   
+  private void processDirectory(File processDirectory)
+  {
+	  
+	File[] files = processDirectory.listFiles();	
+	
+	Arrays.sort(files);
+  	
+  	//Add all files of image type to pdfGenerator
+  	for(int i=0;i < files.length; i++)
+  	{
+  		System.out.println(files[i].getName());
+  		//TODO: Add different graphic types
+  		if(files[i].getName().endsWith("jpeg")||
+  				files[i].getName().endsWith("jpg") ||
+  				files[i].getName().endsWith("JPEG")||
+  				files[i].getName().endsWith("JPG"))
+  		{
+  			System.out.println("Adding " + files[i].getName());
+  			//pdfGenerator.addImage(processDirectory[i]);
+  		}
+  	}
+  }
+  
   public void actionPerformed(ActionEvent event)
   {    
     
@@ -57,23 +103,34 @@ public class JMangle extends JFrame implements ActionListener
         // Demonstrate "Open" dialog:
               
         if (jfc.showOpenDialog(JMangle.this) == JFileChooser.APPROVE_OPTION) 
+        {        	
+        	processDirectory(jfc.getSelectedFile());
+        	parsing_directory = jfc.getSelectedFile();
+        }
+    }
+    
+    else if(event.getSource() == group_of_directories)
+    {
+        JFileChooser jfc = new JFileChooser(new File("."));
+        jfc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+        // Demonstrate "Open" dialog:
+              
+        if (jfc.showOpenDialog(JMangle.this) == JFileChooser.APPROVE_OPTION) 
         {
         	
         	File[] listOfFiles = jfc.getSelectedFile().listFiles();
         	
+        	Arrays.sort(listOfFiles);
+        	
         	//Add all files of image type to pdfGenerator
         	for(int i=0;i < listOfFiles.length; i++)
         	{
-        		if(listOfFiles[i].getName().endsWith("jpeg")||listOfFiles[i].getName().endsWith("jpg"))
-        		{
-        			System.out.println("Adding " + listOfFiles[i].getName());
-        			pdfGenerator.addImage(listOfFiles[i]);
-        		}
-        	}
-
-        	
+        		System.out.println(listOfFiles[i].getName());
+        		processDirectory(listOfFiles[i]);
+        	}       	
         	parsing_directory = jfc.getSelectedFile();
         }
+
     }
     
     else if(event.getSource() == run_button)
@@ -91,6 +148,7 @@ public class JMangle extends JFrame implements ActionListener
     	}
     }
   }
+  
     
   public static void main(String args[])
   {
